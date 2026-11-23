@@ -1,0 +1,16 @@
+code,airline_name,flights,cancelled,pct_cancelled,cancel_carrier,cancel_weather,cancel_nas,avg_dep_delay,pct_dep_delayed_15,pct_departed_early,max_dep_delay,max_early_departure,delays_3h_plus
+WN,Southwest Airlines Co.: WN,115389,3566,3.09,233,3263,70,13.99,25.41,43.58,610,19,665
+AA,American Airlines Inc.: AA,77346,1248,1.61,89,1140,19,25.49,27.17,52.97,3125,23,1962
+DL,Delta Air Lines Inc.: DL,74384,478,0.64,101,374,3,14.83,18.0,59.61,1174,36,1127
+UA,United Air Lines Inc.: UA,58855,4714,8.01,3955,743,16,19.16,21.18,57.48,1804,37,1157
+OO,SkyWest Airlines Inc.: OO,56814,2384,4.20,21,2328,35,23.57,21.69,63.64,1627,43,1707
+YX,Republic Airline: YX,22914,1061,4.63,60,954,47,11.53,14.25,75.56,1289,34,264
+MQ,Envoy Air: MQ,20750,932,4.49,29,866,37,18.02,24.13,56.18,1546,24,301
+NK,Spirit Air Lines: NK,20415,303,1.48,13,282,8,18.03,26.09,52.35,1396,27,306
+B6,JetBlue Airways: B6,19580,334,1.71,47,126,161,23.04,27.76,53.39,1838,34,482
+AS,Alaska Airlines Inc.: AS,17775,3119,17.55,2940,179,0,19.45,27.91,50.51,684,56,246
+9E,Endeavor Air Inc.: 9E,16972,706,4.16,11,537,158,20.96,21.42,66.01,1246,32,379
+OH,PSA Airlines Inc.: OH,16526,944,5.71,54,878,12,23.16,23.21,62.26,2629,32,433
+F9,Frontier Airlines Inc.: F9,14379,311,2.16,44,267,0,23.54,25.43,60.37,1305,35,338
+G4,Allegiant Air: G4,8596,193,2.25,62,129,2,21.50,20.94,64.41,1523,44,201
+HA,Hawaiian Airlines Inc.: HA,6576,96,1.46,77,19,0,12.13,22.08,44.84,1441,22,27

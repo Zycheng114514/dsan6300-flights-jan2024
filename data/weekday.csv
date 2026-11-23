@@ -1,0 +1,8 @@
+day_code,day_of_week,days_in_month,flights,flights_per_day,cancelled
+1,Monday,5,91299,18260,4561
+2,Tuesday,5,85106,17021,3993
+3,Wednesday,5,85719,17144,2209
+4,Thursday,4,73913,18478,1857
+5,Friday,4,74105,18526,3323
+6,Saturday,4,63514,15879,1985
+7,Sunday,4,73615,18404,2461

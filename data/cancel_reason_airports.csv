@@ -1,0 +1,16 @@
+code,airport_name,total,carrier,weather,nas
+ORD,"Chicago, IL: Chicago O'Hare International",1420,444,946,30
+DEN,"Denver, CO: Denver International",991,488,492,11
+SEA,"Seattle, WA: Seattle/Tacoma International",965,870,95,0
+EWR,"Newark, NJ: Newark Liberty International",706,555,144,7
+DCA,"Washington, DC: Ronald Reagan Washington National",654,34,594,26
+DFW,"Dallas/Fort Worth, TX: Dallas/Fort Worth International",654,49,596,9
+LGA,"New York, NY: LaGuardia",582,42,474,66
+SFO,"San Francisco, CA: San Francisco International",574,516,54,4
+IAH,"Houston, TX: George Bush Intercontinental/Houston",562,335,223,4
+BNA,"Nashville, TN: Nashville International",522,70,443,9
+MDW,"Chicago, IL: Chicago Midway International",491,6,484,1
+LAX,"Los Angeles, CA: Los Angeles International",471,370,100,1
+MCO,"Orlando, FL: Orlando International",418,228,176,14
+PDX,"Portland, OR: Portland International",394,254,140,0
+LAS,"Las Vegas, NV: McCarran International",374,193,166,15
