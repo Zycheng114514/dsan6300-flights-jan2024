@@ -1,0 +1,12 @@
+# raw BTS download (247 MB) - re-download from TranStats, see README
+data/raw/
+# rendered site lives on the gh-pages branch
+website/_site/
+website/.quarto/
+*.quarto_ipynb
+# private working notes / Canvas upload copies
+submission/
+AWS_STEPS.md
+LINKEDIN_POST_DRAFT.md
+.DS_Store
+__pycache__/
