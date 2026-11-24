@@ -1,0 +1,16 @@
+code,airline_name,flights,cancelled,pct_cancelled,avg_delay
+WN,Southwest Airlines Co.: WN,115389,3566,3.09,13.99
+AA,American Airlines Inc.: AA,77346,1248,1.61,25.49
+DL,Delta Air Lines Inc.: DL,74384,478,0.64,14.83
+UA,United Air Lines Inc.: UA,58855,4714,8.01,19.16
+OO,SkyWest Airlines Inc.: OO,56814,2384,4.20,23.57
+YX,Republic Airline: YX,22914,1061,4.63,11.53
+MQ,Envoy Air: MQ,20750,932,4.49,18.02
+NK,Spirit Air Lines: NK,20415,303,1.48,18.03
+B6,JetBlue Airways: B6,19580,334,1.71,23.04
+AS,Alaska Airlines Inc.: AS,17775,3119,17.55,19.45
+9E,Endeavor Air Inc.: 9E,16972,706,4.16,20.96
+OH,PSA Airlines Inc.: OH,16526,944,5.71,23.16
+F9,Frontier Airlines Inc.: F9,14379,311,2.16,23.54
+G4,Allegiant Air: G4,8596,193,2.25,21.50
+HA,Hawaiian Airlines Inc.: HA,6576,96,1.46,12.13
