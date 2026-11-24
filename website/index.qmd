@@ -1,178 +1,84 @@
 ---
-title: "One Month, Two Shocks"
-subtitle: "What 547,271 US flights from January 2024 say about delays and cancellations"
+title: "US Flight Delays and Cancellations in January 2024"
 author: "Zhiyang Cheng"
-date: last-modified
-date-format: "MMMM YYYY"
 ---
 
 ```{python}
 import viz
 ```
 
-::: {.lead-text}
-January 2024 looks like an ordinary winter month at first. But when I loaded every domestic
-flight into a MySQL database on AWS and asked it questions, two separate disruptions
-stood out: a wave of winter storms, and the grounding of one aircraft type that hit two
-airlines especially hard. This page tells that story. The
-[7 SQL questions](questions.qmd) page gives the exact queries and answers.
-:::
+For this project I loaded all 547,271 US domestic flights from January 2024 into a MySQL
+database on AWS and answered the seven assignment questions with SQL. This page shows what I
+found. The queries and full results are on the [SQL Questions](questions.qmd) page.
 
-::: {.stat-row}
-::: {.stat}
-[547,271]{.num}
+In January 2024, 20,389 flights (3.7%) were cancelled. Most of them came from two events: a
+week of winter storms in the middle of the month, and the grounding of the Boeing 737 MAX 9.
 
-[flights by 15 airlines from 334 airports]{.lbl}
-:::
-::: {.stat}
-[3.7%]{.num}
-
-[cancelled: 20,389 flights]{.lbl}
-:::
-::: {.stat}
-[89%]{.num}
-
-[of airline-caused cancellations were Alaska or United]{.lbl}
-:::
-::: {.stat}
-[2,962]{.num}
-
-[cancellations on Jan 15, the worst day]{.lbl}
-:::
-:::
-
-## 1. Two shocks hit the same month
-
-Every cancelled flight in the data carries a reason code. **Weather** means the airline
-cancelled because of the weather. **Carrier** means the cause was within the airline's control
-(crew, maintenance, aircraft). **National Air System** means air traffic control or airport
-operations. Plotting them by day shows two very different patterns.
+## Cancellations by day
 
 ```{python}
-viz.show(viz.fig_daily_cancellations())
+viz.daily_cancellations()
 ```
 
-- **Weather (orange) came in bursts.** Storms on January 9 and again from January 12 to 16
-  drove cancellations to 2,962 on January 15 (Martin Luther King Jr. Day). The five days from Jan 12 to Jan 16 alone hold
-  **46% of the whole month's cancellations**. The average departure delay that day was
-  51 minutes, compared with about 9 minutes on a calm day like January 5.
-- **Carrier cancellations (blue) behaved like a plateau, not a storm.** They averaged 16 per day
-  from January 1 to 5. Overnight they jumped to **about 335 per day** and stayed there until
-  January 27, and then they dropped. Weather doesn't behave like that. A policy decision does.
+Every cancelled flight has a reason code. Weather cancellations came in spikes. The worst day
+was January 15 with 2,962 cancellations, and January 12 to 16 alone had 46% of all
+cancellations in the month.
 
-## 2. One aircraft type, two airlines
+Carrier cancellations, the ones caused by the airline itself, look different. There were about
+16 a day from January 1 to 5, then about 335 a day from January 6 to 27. On January 5 a door
+plug blew out of an Alaska Airlines 737 MAX 9 during a flight, and the FAA grounded these
+planes the next day. Alaska and United were the two US airlines flying this model. Alaska
+started flying them again on January 26 and United on January 27.
 
-On the evening of January 5, a door plug blew out of an Alaska Airlines Boeing 737 MAX 9
-shortly after takeoff from Portland (Flight 1282). The next day the FAA grounded 171
-MAX 9 jets with the same door plug design. Alaska (65 jets) and United (79 jets) flew most of them in the US.
-Alaska resumed MAX 9 flights on January 26 and United on January 27.
+## Cancellations by airline
 
 ```{python}
-viz.show(viz.fig_carrier_cancellations())
+viz.airline_cancellations()
 ```
 
-::: {.takeaway}
-Of the **7,736** cancellations blamed on the airline itself, **6,895 (89%)** were Alaska or
-United. During the grounding (January 6–27) those two airlines averaged about 300
-carrier-caused cancellations a day. The other 13 airlines *combined* averaged 33 a day, up from 13 a day before it.
-Alaska cancelled **17.6%** of all its January flights,
-roughly 1 in 6. Delta, for comparison, cancelled 0.6%.
-:::
+Alaska cancelled 17.6% of its flights and United 8.0%. Every other airline was under 6%, and
+Delta was the lowest at 0.6%. Alaska and United also had 6,895 of the 7,736 carrier
+cancellations (89%). The data has no aircraft type column, so I can't connect a single flight
+to the grounding, but the airlines and the dates match.
 
-The outside events line up with the database. The plateau starts on January 6, the day the
-grounding order was issued. United's line falls on January 28, the day after its MAX 9s returned.
-The data alone can't prove that a given flight was cancelled *because of* the grounding.
-But no other explanation fits two airlines, one date range and one cancellation code this well.
-
-## 3. Delays and cancellations are different ways to fail
-
-One of the assignment questions asks for each airline's *longest* delay. That turns out to be a
-poor measure of service. American had the single worst delay of the month: one flight left
-**3,125 minutes (52 hours)** late. Alaska's worst delay was only 684 minutes, the
-second-shortest of any airline. Yet Alaska cancelled more flights than anyone. Putting the
-typical delay and the cancellation rate side by side shows the real trade-offs:
+## Delays by airline
 
 ```{python}
-viz.show(viz.fig_airline_bubble())
+viz.airline_delays()
 ```
 
-- **Alaska and United** sit high on the chart. Their problem was cancelled flights, and only
-  moderate delays.
-- **American, Frontier and JetBlue** sit far right. They cancelled few flights (1.6–2.2%) but
-  were often late: American's average departure delay was 25.5 minutes, the worst of any airline.
-- **Delta** sits in the best corner: the lowest cancellation rate (0.64%) and a below-average delay (14.8 minutes).
-  **Southwest**, by far the largest airline (115,389 flights), kept its average delay to 14.0 minutes.
+Delays rank the airlines differently. American had the highest average departure delay at 25.5
+minutes, but it cancelled only 1.6% of its flights. Alaska and United were in the middle at
+about 19 minutes. An airline can cancel few flights and still be late a lot, and the other way
+around.
 
-A single worst-case number (Problem 1) or a single average can't show this. You need both
-measures, and you need to know how many flights sit behind each.
-
-## 4. Watch the sample size: small airports produce extreme averages
-
-Problem 4 asks which airport had the highest average departure delay. The answer is
-**North Central West Virginia (CKB) in Clarksburg/Fairmont**, at **86 minutes**. But CKB had only **15
-departures** in the whole month, so a few badly delayed flights decide its average.
-The scatter shows that pattern for every airport:
+## Delays by time of day
 
 ```{python}
-viz.show(viz.fig_airports_scatter())
+viz.time_of_day()
 ```
 
-Small airports, on the left, spread from 0 to 86 minutes. Big airports, on the right,
-cluster between about 10 and 35 minutes. Among the 86 airports with at least 1,000 departures, the
-worst was **Des Moines (DSM), 35.3 minutes**. Iowa had heavy snow and extreme cold in
-mid-January. The best were in California: San Jose (9.6), Long Beach (9.6) and
-Oakland (10.5). The same caution applies to Problem 5: Spirit's "worst airport" is based on a
-**single flight**. See [Problem 5](questions.qmd#problem-5).
+Delays build up during the day, probably because a late plane also makes its next flight late.
+Only 9.9% of flights scheduled between 6 and 7 a.m. left 15 or more minutes late. For flights
+scheduled between 7 and 8 p.m. it was 32.1%.
 
-## 5. The reason behind cancellations depends on whose hub it is
+## Small airports
 
-```{python}
-viz.show(viz.fig_reason_airports())
-```
+The airport with the highest average departure delay (Problem 4) is North Central West
+Virginia airport (CKB) at 86 minutes. But CKB had only 15 departures in January, so a few very
+late flights decide its average. Some answers in Problem 5 have the same problem.
 
-At most airports, weather was the most common reason for cancelling. That was true at 253 of
-the 296 airports that had any cancellations (counting ties), including Chicago O'Hare, Dallas/Fort Worth,
-Washington National and LaGuardia. But at **Seattle (90% carrier-caused)**, San Francisco,
-Newark, Los Angeles and Houston, the airline was the main cause. These are Alaska's and United's
-hubs. The aircraft grounding shows up in the airport data too.
+## Data and method
 
-## 6. If you can choose when to fly
+The data is the Reporting Carrier On-Time Performance table from the Bureau of Transportation
+Statistics for January 2024, with one row per flight. I created the schema FAA on AWS RDS
+(MySQL) and the fact table al_perf, copied the CSV to an EC2 instance with scp, and loaded it
+with mysqlimport. The six lookup tables (airlines, airports, airport IDs, cancellation reasons,
+distance groups and weekdays) were loaded with the MySQL Workbench import wizard.
 
-```{python}
-viz.show(viz.fig_time_of_day())
-```
+mysqlimport saves empty numbers as 0. A cancelled flight that never left the gate has an empty
+departure time and delay, so its delay becomes 0 after loading. For the delay questions I only
+use flights that have a departure time (`DepTime <> ''`).
 
-Delays build up during the day. Each late flight makes that aircraft's next flight late too.
-Of flights scheduled to leave between 6 and 7 a.m., **9.9%** left 15+ minutes late. For flights
-scheduled between 7 and 8 p.m. it was **32.1%**, more than three times as many.
-
-```{python}
-viz.show(viz.fig_weekday())
-```
-
-Problem 3 ranks Monday as the busiest day, but that's mostly a calendar effect. January 2024
-started on a Monday, so it had **five** Mondays, Tuesdays and Wednesdays (blue) and only four of
-every other day. Per day, **Friday (18,526 flights) and Thursday (18,478)** were busiest, and
-Saturday was clearly the quietest day (15,879). The Saturday dips show up as a weekly rhythm in the
-3-day moving average ([Problem 7](questions.qmd#problem-7)).
-
-## What to take away
-
-1. **Look at causes, not just totals.** The month's 20,389 cancellations came from two
-   different events. Splitting them by reason code and date separated a weather story from an
-   aircraft-safety story.
-2. **Most airline-caused cancellations trace to one grounding.** Alaska and United account
-   for 89% of them, and the pattern starts and ends on the dates the MAX 9s left and returned
-   to service.
-3. **A worst case or an average needs its denominator.** The worst-delay airport and several
-   "worst airport per airline" answers rest on a handful of flights. Reporting the counts
-   alongside averages keeps a dashboard honest.
-4. **Fly early in the day if you can.** Morning departures were about three times less likely
-   to leave 15+ minutes late than evening ones.
-
-::: {.small-note}
-How the numbers were produced: the January 2024 file from the Bureau of Transportation
-Statistics was copied to an AWS EC2 instance, loaded into MySQL on Amazon RDS with
-`mysqlimport`, joined with 6 lookup (dimension) tables, and analyzed with SQL (window functions and
-CTEs). Details and data-cleaning decisions are on the [Data & methods](methods.qmd) page.
-:::
+The charts are made with Python (pandas and Plotly) from the query results, and the site is
+built with Quarto.

@@ -1,277 +1,255 @@
 ---
-title: "The 7 SQL Questions"
-subtitle: "Each assignment question with the query I ran on MySQL (AWS RDS), its result, and what it means"
+title: "SQL Questions"
 ---
 
 ```{python}
 import viz
-from IPython.display import Markdown
-
-def sql_block(label):
-    code = "\n".join(l for l in viz.problem_sql(label).splitlines() if not l.lstrip().startswith("#"))
-    return Markdown(f"```sql\n{code.strip()}\n```")
-
-def csv_link(label, n):
-    f = f"data/{viz.PREFIX}_problem{label}.csv"
-    return Markdown(f"[Download result CSV]({f}) · {n:,} rows")
 ```
 
-All queries run against schema `FAA`: the fact table `al_perf` (547,271 flights,
-January 2024) plus the dimension tables `L_AIRLINE_ID`, `L_AIRPORT`, `L_WEEKDAYS` and
-`L_CANCELATION`. The full submission file is
-[hw4_cheng_zhiyang_zc385.sql](data/hw4_cheng_zhiyang_zc385.sql).
+All queries run on the schema FAA, which has the fact table al_perf and the lookup tables. For
+the delay questions (1, 2, 4 and 5) I only use flights that have a departure time, because
+mysqlimport saved the empty delays of cancelled flights as 0.
 
-::: {.callout-note}
-## One data-cleaning rule used in Problems 1, 2, 4 and 5
-`mysqlimport` loads a blank numeric field as **0**, not NULL. A cancelled flight that never
-left the gate has a blank departure time and a blank delay, so after loading its delay looks like
-"0 minutes". Left in, those 19,784 rows would make airports and airlines with many cancellations
-look *more* punctual. Departure-delay questions therefore keep only flights with a recorded
-departure time (`DepTime <> ''`). See [Data & methods](methods.qmd#cleaning).
-:::
+## Problem 1
 
-## Problem 1 {#problem-1}
+*Find maximal departure delay in minutes for each airline. Sort results from smallest to
+largest maximum delay. Output airline names and values of the delay.*
 
-*Find maximal departure delay in minutes for each airline. Sort results from smallest to largest
-maximum delay. Output airline names and values of the delay.*
-
-```{python}
-sql_block("1")
+```sql
+SELECT a.Name AS airline_name,
+       MAX(p.DepDelay) AS max_departure_delay_minutes
+FROM al_perf p
+JOIN L_AIRLINE_ID a ON a.ID = p.DOT_ID_Reporting_Airline
+WHERE p.DepTime <> ''
+GROUP BY a.ID, a.Name
+ORDER BY max_departure_delay_minutes ASC;
 ```
 
 ```{python}
-q1 = viz.result("1")
-viz.md_table(q1, floatfmt=".0f")
+viz.table(viz.result(1))
 ```
 
 ```{python}
-csv_link("1", len(q1))
+viz.q1_chart()
 ```
 
-```{python}
-viz.show(viz.fig_q1())
-```
+Southwest had the smallest maximum delay (610 minutes) and American the largest (3,125 minutes,
+about 52 hours). Every airline had at least one flight that was more than 10 hours late.
+[Download CSV](data/hw4_cheng_zhiyang_zc385_problem1.csv)
 
-::: {.answer}
-Southwest had the shortest "worst delay" (610 minutes, about 10 hours) and American the longest
-(**3,125 minutes, about 52 hours**). Every airline had at least one flight more than 10 hours late, so the
-maximum mostly reflects one unlucky flight, not typical service. [The story](index.qmd#delays-and-cancellations-are-different-ways-to-fail)
-compares it with average delay.
-:::
-
-## Problem 2 {#problem-2}
+## Problem 2
 
 *Find maximal early departures in minutes for each airline. Sort results from largest to
 smallest. Output airline names.*
 
-An early departure has a negative `DepDelay`, so the earliest departure is `-MIN(DepDelay)`.
+An early departure has a negative DepDelay, so the earliest one is `-MIN(DepDelay)`.
 
-```{python}
-sql_block("2")
+```sql
+SELECT a.Name AS airline_name,
+       -MIN(p.DepDelay) AS max_early_departure_minutes
+FROM al_perf p
+JOIN L_AIRLINE_ID a ON a.ID = p.DOT_ID_Reporting_Airline
+WHERE p.DepTime <> ''
+  AND p.DepDelay < 0
+GROUP BY a.ID, a.Name
+ORDER BY max_early_departure_minutes DESC;
 ```
 
 ```{python}
-q2 = viz.result("2")
-viz.md_table(q2, floatfmt=".0f")
+viz.table(viz.result(2))
+```
+
+Alaska had the earliest departure, 56 minutes before schedule. Southwest never left more than
+19 minutes early.
+[Download CSV](data/hw4_cheng_zhiyang_zc385_problem2.csv)
+
+## Problem 3
+
+*Rank days of the week by the number of flights performed by all airlines on that day (1 is
+the busiest). Output the day of the week names, number of flights and ranks in the rank
+increasing order.*
+
+```sql
+SELECT w.Day AS day_of_week,
+       COUNT(*) AS num_flights,
+       RANK() OVER (ORDER BY COUNT(*) DESC) AS day_rank
+FROM al_perf p
+JOIN L_WEEKDAYS w ON w.Code = p.DayOfWeek
+GROUP BY w.Code, w.Day
+ORDER BY day_rank;
 ```
 
 ```{python}
-csv_link("2", len(q2))
+viz.table(viz.result(3))
 ```
 
 ```{python}
-viz.show(viz.fig_q2())
+viz.q3_chart()
 ```
 
-::: {.answer}
-Alaska had the earliest departure, **56 minutes ahead of schedule**, followed by Allegiant (44)
-and SkyWest (43). Southwest never left more than 19 minutes early. Leaving a few minutes
-early is normal (55% of all departures pushed back before their scheduled time), but gaps of
-40+ minutes are rare outliers.
-:::
+Monday is the busiest day with 91,299 flights and Saturday the quietest. January 2024 had five
+Mondays, Tuesdays and Wednesdays and only four of the other days, which is a big reason those
+three days are at the top.
+[Download CSV](data/hw4_cheng_zhiyang_zc385_problem3.csv)
 
-## Problem 3 {#problem-3}
-
-*Rank days of the week by the number of flights performed by all airlines on that day (1 is the
-busiest). Output the day of the week names, number of flights and ranks in the rank increasing order.*
-
-Each row of `al_perf` is one flight (BTS sets `Flights = 1` on every row, cancelled ones
-included), so the count is `COUNT(*)`. `RANK()` assigns the ranks.
-
-```{python}
-sql_block("3")
-```
-
-```{python}
-q3 = viz.result("3")
-viz.md_table(q3, floatfmt=".0f")
-```
-
-```{python}
-csv_link("3", len(q3))
-```
-
-```{python}
-viz.show(viz.fig_weekday())
-```
-
-::: {.answer}
-Monday ranks first (91,299 flights), then Wednesday and Tuesday. But January 2024 had **five**
-Mondays, Tuesdays and Wednesdays and only four of every other day. Per day, Friday and Thursday
-were actually busiest, and Saturday was the quietest day either way.
-If only flights that actually operated are counted (cancelled ones excluded), Thursday,
-Sunday and Friday swap places 4–6, because two of the four Fridays (Jan 12 and 19) had heavy
-storm cancellations.
-:::
-
-## Problem 4 {#problem-4}
+## Problem 4
 
 *Find the airport that has the highest average departure delay among all airports. Consider 0
 minutes delay for flights that departed early. Output one line of results: the airport name,
 code, and average delay.*
 
-`GREATEST(DepDelay, 0)` turns early departures into 0 minutes. Airports are origin
-(departure) airports.
+`GREATEST(DepDelay, 0)` counts early departures as 0 minutes.
 
-```{python}
-sql_block("4")
+```sql
+SELECT ap.Name AS airport_name,
+       p.Origin AS airport_code,
+       ROUND(AVG(GREATEST(p.DepDelay, 0)), 2) AS avg_departure_delay_minutes
+FROM al_perf p
+JOIN L_AIRPORT ap ON ap.Code = p.Origin
+WHERE p.DepTime <> ''
+GROUP BY p.Origin, ap.Name
+ORDER BY AVG(GREATEST(p.DepDelay, 0)) DESC
+LIMIT 1;
 ```
 
 ```{python}
-q4 = viz.result("4")
-viz.md_table(q4)
+viz.table(viz.result(4))
 ```
 
-```{python}
-csv_link("4", len(q4))
-```
+North Central West Virginia airport (CKB) had the highest average delay, 86 minutes. It only
+had 15 departures in January.
+[Download CSV](data/hw4_cheng_zhiyang_zc385_problem4.csv)
 
-::: {.answer}
-**North Central West Virginia airport (CKB), Clarksburg/Fairmont, WV: 86.00 minutes.** That
-average comes from only 15 departures. Among airports with at least 1,000 departures the
-highest was Des Moines (35.3 minutes). [The story](index.qmd#watch-the-sample-size-small-airports-produce-extreme-averages)
-plots every airport.
-:::
-
-## Problem 5 {#problem-5}
+## Problem 5
 
 *For each airline find an airport where it has the highest average departure delay. Output an
 airline name, a name of the airport that has the highest average delay, and the value of that
 average delay.*
 
-A CTE computes each airline's average delay at each airport (early = 0, as in Problem 4).
-`RANK() OVER (PARTITION BY airline ...)` then keeps the top airport per airline. There were no ties,
-so it returns one row per airline.
+The CTE gets each airline's average delay at each airport, and `RANK()` keeps the top airport
+for each airline.
 
-```{python}
-sql_block("5")
+```sql
+WITH airline_airport AS (
+    SELECT p.DOT_ID_Reporting_Airline AS airline_id,
+           p.Origin AS airport_code,
+           AVG(GREATEST(p.DepDelay, 0)) AS avg_delay
+    FROM al_perf p
+    WHERE p.DepTime <> ''
+    GROUP BY p.DOT_ID_Reporting_Airline, p.Origin
+),
+ranked AS (
+    SELECT airline_id, airport_code, avg_delay,
+           RANK() OVER (PARTITION BY airline_id ORDER BY avg_delay DESC) AS rnk
+    FROM airline_airport
+)
+SELECT a.Name AS airline_name,
+       ap.Name AS airport_name,
+       ROUND(r.avg_delay, 2) AS avg_departure_delay_minutes
+FROM ranked r
+JOIN L_AIRLINE_ID a ON a.ID = r.airline_id
+JOIN L_AIRPORT ap ON ap.Code = r.airport_code
+WHERE r.rnk = 1
+ORDER BY r.avg_delay DESC;
 ```
 
 ```{python}
-q5 = viz.result("5")
-viz.md_table(q5)
+viz.table(viz.result(5))
 ```
 
-```{python}
-csv_link("5", len(q5))
-```
+PSA at Syracuse has the highest value, 217 minutes. Many of these averages come from very few
+flights. For example, Spirit's worst airport (Lafayette, LA) had only one Spirit departure.
+[Download CSV](data/hw4_cheng_zhiyang_zc385_problem5.csv)
 
-```{python}
-viz.show(viz.fig_q5())
-```
-
-::: {.answer}
-PSA's flights from Syracuse averaged **217 minutes** of delay, the highest of any airline–airport pair
-on the list. The chart adds what the required output leaves out: how many departures each
-average is based on. Seven of the 15 rest on fewer than 20 flights, and Spirit's "worst
-airport" (Lafayette, LA) is a **single flight**. Southwest's worst airport, Des Moines (24.5 minutes over 134 flights), is
-the most reliable result here.
-:::
-
-## Problem 6a {#problem-6a}
+## Problem 6a
 
 *Check if your dataset has any canceled flights.*
 
-```{python}
-sql_block("6a")
+```sql
+SELECT COUNT(*) AS total_flights,
+       SUM(Cancelled = 1) AS cancelled_flights,
+       ROUND(100 * SUM(Cancelled = 1) / COUNT(*), 2) AS pct_cancelled
+FROM al_perf;
 ```
 
 ```{python}
-q6a = viz.result("6a")
-viz.md_table(q6a)
+viz.table(viz.result("6a"))
 ```
+
+Yes. 20,389 of the 547,271 flights (3.73%) were cancelled.
+[Download CSV](data/hw4_cheng_zhiyang_zc385_problem6a.csv)
+
+## Problem 6b
+
+*If it does, what was the most frequent reason for each departure airport? Output airport
+name, the most frequent reason, and the number of cancelations for that reason.*
+
+```sql
+WITH airport_reason AS (
+    SELECT p.Origin AS airport_code,
+           p.CancellationCode,
+           COUNT(*) AS num_cancellations
+    FROM al_perf p
+    WHERE p.Cancelled = 1
+    GROUP BY p.Origin, p.CancellationCode
+),
+ranked AS (
+    SELECT airport_code, CancellationCode, num_cancellations,
+           RANK() OVER (PARTITION BY airport_code ORDER BY num_cancellations DESC) AS rnk
+    FROM airport_reason
+)
+SELECT ap.Name AS airport_name,
+       c.Reason AS most_frequent_reason,
+       r.num_cancellations
+FROM ranked r
+JOIN L_AIRPORT ap ON ap.Code = r.airport_code
+JOIN L_CANCELATION c ON c.Code = r.CancellationCode
+WHERE r.rnk = 1
+ORDER BY r.num_cancellations DESC, airport_name, most_frequent_reason;
+```
+
+The first 15 of 301 rows:
 
 ```{python}
-csv_link("6a", len(q6a))
+viz.table(viz.result("6b").head(15))
 ```
 
-::: {.answer}
-Yes. **20,389 of 547,271 flights (3.73%) were cancelled**: 12,085 for weather, 7,736 for carrier
-reasons, 568 for the National Air System and none for security.
-:::
+296 airports had at least one cancellation. At 5 of them two reasons tie for first, so the
+result has 301 rows. Weather was the top reason at 253 airports. Carrier was the top reason at
+45, including Seattle, Newark, San Francisco, Los Angeles and Houston, which are Alaska and
+United hubs.
+[Download CSV](data/hw4_cheng_zhiyang_zc385_problem6b.csv)
 
-## Problem 6b {#problem-6b}
-
-*If it does, what was the most frequent reason for each departure airport? Output airport name,
-the most frequent reason, and the number of cancelations for that reason.*
-
-The query counts cancellations by (airport, reason), ranks the reasons within each airport and
-keeps rank 1. 296 airports had at least one cancellation. At 5 of them two reasons tie
-for first place, and both are listed, so the result has **301 rows**. The first 20 are shown below; the
-CSV has all of them.
-
-```{python}
-sql_block("6b")
-```
-
-```{python}
-q6b = viz.result("6b")
-viz.md_table(q6b.head(20), floatfmt=".0f")
-```
-
-```{python}
-csv_link("6b", len(q6b))
-```
-
-```{python}
-viz.show(viz.fig_q6b())
-```
-
-::: {.answer}
-Weather was the top reason at most airports, including Chicago O'Hare (946 weather cancellations,
-the largest single count). The exceptions are telling: Seattle, Newark, San Francisco, Los Angeles and
-Houston were dominated by **carrier** cancellations. These are Alaska's and United's hubs,
-the two airlines grounded with the 737 MAX 9.
-:::
-
-## Problem 7 {#problem-7}
+## Problem 7
 
 *Build a report that for each day output average number of flights considering the current and
 the previous two days.*
 
-A 3-day moving average uses the window `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` over daily flight counts.
-January 1 and 2 have no earlier days in this dataset, so their averages use the 1 or 2 days that exist.
+`ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` gives the 3-day moving average. January 1 and 2 use
+only the days that exist.
 
-```{python}
-sql_block("7")
+```sql
+WITH daily AS (
+    SELECT FlightDate, COUNT(*) AS num_flights
+    FROM al_perf
+    GROUP BY FlightDate
+)
+SELECT FlightDate AS flight_date,
+       num_flights,
+       ROUND(AVG(num_flights) OVER (ORDER BY FlightDate
+                                    ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS avg_flights_3day
+FROM daily
+ORDER BY FlightDate;
 ```
 
 ```{python}
-q7 = viz.result("7")
-viz.md_table(q7)
+viz.q7_chart()
 ```
 
 ```{python}
-csv_link("7", len(q7))
+viz.table(viz.result(7))
 ```
 
-```{python}
-viz.show(viz.fig_q7())
-```
-
-::: {.answer}
-Daily scheduled flights range from about 15,500 to 19,000, while the 3-day average stays between
-about 17,100 and 18,500. The raw counts follow a strong weekly rhythm. Saturdays are the low
-points (about 15,500 on Jan 13, 20 and 27; 16,950 on Jan 6). After the New Year week, Tuesdays and
-Wednesdays sit near 16,500. The moving average smooths that weekly cycle so slower trends show through.
-:::
+The daily count goes from about 15,500 to 19,000 and drops every Saturday. The 3-day average
+smooths this out and stays between about 17,100 and 18,500.
+[Download CSV](data/hw4_cheng_zhiyang_zc385_problem7.csv)

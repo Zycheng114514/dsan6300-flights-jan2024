@@ -3,35 +3,23 @@ project:
   output-dir: _site
   resources:
     - data/*.csv
-    - data/*.sql
 
 website:
   title: "Flights in January 2024"
-  description: "DSAN 6300 mini-project: delays and cancellations in 547,271 US flights, analyzed with SQL on AWS RDS MySQL."
   navbar:
     left:
       - href: index.qmd
-        text: The story
+        text: Home
       - href: questions.qmd
-        text: The 7 SQL questions
-      - href: methods.qmd
-        text: Data & methods
-  page-footer:
-    left: "Zhiyang Cheng · DSAN 6300 Mini-Project (Homework 4)"
-    right: "Data: Bureau of Transportation Statistics, Reporting Carrier On-Time Performance"
+        text: SQL Questions
+  page-footer: "Zhiyang Cheng, DSAN 6300 Mini-Project. Data: Bureau of Transportation Statistics."
 
 format:
   html:
-    theme: [cosmo, theme.scss]
-    css: styles.css
+    theme: cosmo
     toc: true
-    toc-depth: 2
-    code-copy: true
-    smooth-scroll: true
-    fig-responsive: true
 
 execute:
   echo: false
   warning: false
-  message: false
   freeze: auto
