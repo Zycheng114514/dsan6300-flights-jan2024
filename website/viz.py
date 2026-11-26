@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 from IPython.display import Markdown
 
-BLUE, ORANGE, GREEN, GRAY = "#2a78d6", "#eb6834", "#1baf7a", "#b9b7ae"
+BLUE, ORANGE, GREEN, GRAY = "steelblue", "darkorange", "seagreen", "lightgray"
 
 
 def read(name):

@@ -1,9 +1,9 @@
 # Runs the extra queries for the website charts and saves them in website/data/.
 # Also copies the 8 result CSVs there so the website can show them.
-# Usage: MYSQL_PWD=<password> python scripts/make_chart_data.py <rds-endpoint>
-import os
+# Usage: python scripts/make_chart_data.py <rds-endpoint>
 import shutil
 import sys
+from getpass import getpass
 from pathlib import Path
 
 import pandas as pd
@@ -45,10 +45,8 @@ QUERIES = {
 
 root = Path(__file__).resolve().parent.parent
 out = root / "website" / "data"
-host = sys.argv[1] if len(sys.argv) > 1 else "127.0.0.1"
-conn = pymysql.connect(host=host, port=int(os.getenv("MYSQL_PORT", 3306)),
-                       user=os.getenv("MYSQL_USER", "admin"),
-                       password=os.getenv("MYSQL_PWD", ""), database="FAA")
+conn = pymysql.connect(host=sys.argv[1], user="admin", password=getpass("RDS password: "),
+                       database="FAA")
 
 for name, sql in QUERIES.items():
     with conn.cursor() as cur:

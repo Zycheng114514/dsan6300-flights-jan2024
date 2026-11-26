@@ -12,5 +12,5 @@ Website: https://zycheng114514.github.io/dsan6300-flights-jan2024/
 - `scripts/make_chart_data.py`: runs the extra queries for the charts
 - `website/`: Quarto site (`index.qmd`, `questions.qmd`, `viz.py`)
 
-To rebuild the site: `MYSQL_PWD=<password> python scripts/make_chart_data.py <rds-endpoint>`,
-then `cd website && quarto render`.
+To rebuild the site: `python scripts/make_chart_data.py <rds-endpoint>` (it asks for the
+password), then `cd website && quarto render`.
