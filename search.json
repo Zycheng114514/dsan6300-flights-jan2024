@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "US Flight Delays and Cancellations in January 2024",
     "section": "",
-    "text": "For this project I loaded all 547,271 US domestic flights from January 2024 into a MySQL database on AWS and answered the seven assignment questions with SQL. This page shows what I found. The queries and full results are on the SQL Questions page.\nIn January 2024, 20,389 flights (3.7%) were cancelled. Most of them came from two events: a week of winter storms in the middle of the month, and the grounding of the Boeing 737 MAX 9."
+    "text": "For this project I loaded all 547,271 US domestic flights from January 2024 into a MySQL database on AWS and answered the seven assignment questions with SQL. This page shows what I found. The queries and full results are on the SQL Questions page.\nIn January 2024, 20,389 flights (3.7%) were cancelled. Most of them came from a week of winter storms in the middle of the month and from the grounding of the Boeing 737 MAX 9."
   },
   {
     "objectID": "index.html#cancellations-by-day",
@@ -25,7 +25,7 @@
     "href": "index.html#delays-by-airline",
     "title": "US Flight Delays and Cancellations in January 2024",
     "section": "Delays by airline",
-    "text": "Delays by airline\n\n\n                            \n                                            \n\n\nDelays rank the airlines differently. American had the highest average departure delay at 25.5 minutes, but it cancelled only 1.6% of its flights. Alaska and United were in the middle at about 19 minutes. An airline can cancel few flights and still be late a lot, and the other way around."
+    "text": "Delays by airline\n\n\n                            \n                                            \n\n\nDelays rank the airlines differently. American had the highest average departure delay at 25.5 minutes, but it cancelled only 1.6% of its flights. Alaska and United were in the middle at about 19 minutes."
   },
   {
     "objectID": "index.html#delays-by-time-of-day",
@@ -46,7 +46,7 @@
     "href": "index.html#data-and-method",
     "title": "US Flight Delays and Cancellations in January 2024",
     "section": "Data and method",
-    "text": "Data and method\nThe data is the Reporting Carrier On-Time Performance table from the Bureau of Transportation Statistics for January 2024, with one row per flight. I created the schema FAA on AWS RDS (MySQL) and the fact table al_perf, copied the CSV to an EC2 instance with scp, and loaded it with mysqlimport. The six lookup tables (airlines, airports, airport IDs, cancellation reasons, distance groups and weekdays) were loaded with the MySQL Workbench import wizard.\nmysqlimport saves empty numbers as 0. A cancelled flight that never left the gate has an empty departure time and delay, so its delay becomes 0 after loading. For the delay questions I only use flights that have a departure time (DepTime &lt;&gt; '').\nThe charts are made with Python (pandas and Plotly) from the query results, and the site is built with Quarto."
+    "text": "Data and method\nThe data is the Reporting Carrier On-Time Performance table from the Bureau of Transportation Statistics for January 2024, with one row per flight. I created the schema FAA on AWS RDS (MySQL) and the fact table al_perf with the course script, and loaded the CSV with mysqlimport. I loaded the six lookup tables (airlines, airports, airport IDs, cancellation reasons, distance groups and weekdays) with mysqlimport too. These files have Windows line endings, so my first load merged every two rows into one until I added --lines-terminated-by='\\r\\n'.\nmysqlimport saves empty numbers as 0. A cancelled flight that never left the gate has an empty departure time and delay, so its delay becomes 0 after loading. For the delay questions I only use flights that have a departure time (DepTime &lt;&gt; '').\nThe charts are made with Python (pandas and Plotly) from the query results, and the site is built with Quarto."
   },
   {
     "objectID": "questions.html",
